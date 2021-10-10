@@ -62,6 +62,8 @@ router.delete('/user', passport.authenticate('jwt'), (req, res) => {
     .catch(err => console.log(err))
 })
 
+// <------------------ User Authentication ------------------->
+
 // user registration
 router.post('/user/register', async (req, res) => {
   let status = { name: '', email: '', username: '', password: '' }
@@ -147,3 +149,50 @@ router.post('/user/login', (req, res) => {
   })
 })
 
+// <------------------ User Interaction ------------------->
+
+router.put('/user/interaction', passport.authenticate('jwt'), async (req, res) => {
+  try {
+    if (req.body.type === 'follow') {
+      await User.findByIdAndUpdate(req.user.id, { $addToSet: { following: req.body.follow_user_id } }, { "new": true })
+      await User.findByIdAndUpdate(req.body.follow_user_id, { $addToSet: { followers: req.user.id } }, { "new": true })
+    }
+    if (req.body.type === 'following') {
+      await User.findByIdAndUpdate(req.user.id, { $pull: { following: req.body.follow_user_id } }, { "new": true })
+      await User.findByIdAndUpdate(req.body.follow_user_id, { $pull: { followers: req.user.id } }, { "new": true })
+    }
+    res.json({
+      status: 200,
+      message: `Successfully ${req.body.type}ed`
+    })
+  } catch (err) {
+    res.send(err)
+    return
+  }
+})
+
+// <------------------ Interacting with Post ---------------------->
+
+router.put('/post/interaction', passport.authenticate('jwt'), async (req, res) => {
+
+  try {
+    if (req.body.type === 'like') {
+      await Post.findByIdAndUpdate(req.body.post_id, { $addToSet: { liked_by: req.user._id } }, { "new": true })
+      await User.findByIdAndUpdate(req.user._id, { $addToSet: { liked_post: req.body.post_id } }, { "new": true })
+    }
+    if (req.body.type === 'unlike') {
+      await Post.findByIdAndUpdate(req.body.post_id, { $pull: { liked_by: req.user._id } }, { "new": true })
+      await User.findByIdAndUpdate(req.user._id, { $pull: { liked_post: req.body.post_id } }, { "new": true })
+    }
+    res.json({
+      status: 200,
+      message: `Successfully ${req.body.type}ed`
+    })
+  } catch (err) {
+    res.send(err)
+    return
+  }
+})
+
+
+module.exports = router
