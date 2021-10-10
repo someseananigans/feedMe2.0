@@ -5,6 +5,8 @@ const passport = require('passport')
 const { Strategy: LocalStrategy } = require('passport-local')
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt')
 
+const syncDB = require('./config')
+
 const app = express()
 const { User } = require('./models')
 
@@ -35,6 +37,7 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
-require('.config')
+
+syncDB()
   .then(() => app.listen(process.env.PORT || 3001))
   .catch(err => console.log(err))
