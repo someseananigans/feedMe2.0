@@ -43,3 +43,5 @@ router.get('search/:search', passport.authenticate('jwt'), (req, res) => {
     })
     .catch(err => console.log(err))
 })
+
+module.exports = router
