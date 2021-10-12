@@ -5,7 +5,7 @@ const passport = require('passport')
 const { eventNames } = require('../models/User')
 
 // get current user
-router.get('/user', (req, res) => {
+router.get('/user', passport.authenticate('jwt'), (req, res) => {
   res.json(req.user)
 })
 
