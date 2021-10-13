@@ -85,10 +85,25 @@ router.post('/post', passport.authenticate('jwt'), (req, res) => {
     user: req.user._id
   })
     .then(post => {
-      
+      User.findByIdAndUpdate(req.user._id, { $push: { posts: post._id }})
+        .then(() => res.json(post))
+        .catch(err => console.log(err))
     })
-
+    .catch(err => console.log(err))
 })
 
+// update a post 
+router.put('/post/:post_id', passport.authenticate('jwt'), (req, res) => {
+  Post.findByIdAndUpdate(req.params.post_id, req.body)
+    .then(() => res.sendStatus(200))
+    .catch(err => console.log(err))
+})
+
+// delete a post
+router.delete('/post/:post_id', passport.authenticate('jwt'), (req, res) => {
+  Post.findByIdAndRemove(req.params.post_id)
+    .then(() => res.sendStatus(200))
+    .catch(err => console.log(err))
+})
 
 module.exports = router
