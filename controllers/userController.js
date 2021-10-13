@@ -26,23 +26,22 @@ router.get('/userlist/:count', (req, res) => {
 // get user by id
 router.get('/users/:id', (req, res) => {
   User.findById(req.params.id)
-    .populate(
-      {
-        path: 'posts',
-        model: 'Post',
+    .populate({
+      path: 'posts',
+      model: 'Post',
+      populate: {
+        path: 'user',
+        model: 'User',
+      },
+      populate: {
+        path: 'comments',
+        model: 'Comment',
         populate: {
           path: 'user',
-          model: 'User',
-        },
-        populate: {
-          path: 'comments',
-          model: 'Comment',
-          populate: {
-            path: 'user',
-            model: 'User'
-          }
+          model: 'User'
         }
-      })
+      }
+    })
 
     .then(user => res.json(user))
     .catch(err => console.log(err))
@@ -125,7 +124,7 @@ router.post('/user/register', async (req, res) => {
             date: user,
             status: 200,
             message: 'Successfully Logged In User',
-            user: user ? jwt.sign({id: user._id}, process.env.SECRET) : null
+            user: user ? jwt.sign({ id: user._id }, process.env.SECRET) : null
           })
         }
       })
